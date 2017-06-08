@@ -43,8 +43,7 @@ namespace OpenGLTutorial2
             // dispose of all of the resources that were created
             triangle.Dispose();
             triangleElements.Dispose();
-            square.Dispose();
-            squareElements.Dispose();
+
             program.DisposeChildren = true;
             program.Dispose();
         }
