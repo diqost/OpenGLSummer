@@ -17,13 +17,14 @@ namespace OpenGLTutorial1
 
         static System.Diagnostics.Stopwatch watch;
         static float angle;
-
+        static float move = 0;
+        static float dirrection = 1;
 
         static void Main(string[] args)
         {
             // create an OpenGL window
             Glut.glutInit();
-            Glut.glutInitDisplayMode(Glut.GLUT_DOUBLE 
+            Glut.glutInitDisplayMode(Glut.GLUT_DOUBLE
                 | Glut.GLUT_DEPTH);
             Glut.glutInitWindowSize(width, height);
             Glut.glutCreateWindow("OpenGL Tutorial");
@@ -31,7 +32,8 @@ namespace OpenGLTutorial1
             // provide the Glut callbacks that are necessary for running this tutorial
             Glut.glutIdleFunc(OnRenderFrame);
             Glut.glutDisplayFunc(OnDisplay);
-
+            Gl.Enable(EnableCap.DepthTest);
+          
             program = new ShaderProgram(VertexShader, FragmentShader);
 
             // set the view and projection matrix, which are static throughout this tutorial
@@ -40,43 +42,58 @@ namespace OpenGLTutorial1
             program["view_matrix"].SetValue(Matrix4.LookAt(new Vector3(0, 0, 10), Vector3.Zero, new Vector3(0, 1, 0)));
 
             // create a triangle
-            triangle = new VBO<Vector3>(new Vector3[] { new Vector3(0, 1, 0), new Vector3(-1, -1, 0), new Vector3(1, -1, 0) });
-            triangleElements = new VBO<int>(new int[] { 0, 1, 2 }, BufferTarget.ElementArrayBuffer);
-            triangleColor = new VBO<Vector3>(new Vector3[] { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) });
+            triangle = new VBO<Vector3>(new Vector3[] { new Vector3(-1, 1, 1),
+                                                        new Vector3(1, 1, 1),
+                                                        new Vector3(1, 1, -1),
+                                                        new Vector3(-1, 1, -1),
+                                                        new Vector3(-1, -1, -1),
+                                                        new Vector3(1, -1, -1),
+                                                        new Vector3(1, -1, 1),
+                                                        new Vector3(-1, -1, 1) });
+            triangleElements = new VBO<int>(new int[] { 0, 1, 2, 3, 0, 7, 6, 1, 1,2,5,6,6,7,4,5,5,2,3,4,4,3,0,7 }, BufferTarget.ElementArrayBuffer);
+           
 
             watch = System.Diagnostics.Stopwatch.StartNew();
 
             Glut.glutMainLoop();
         }
 
-        static void OnDisplay(){}
+        static void OnDisplay() { }
 
         static void OnRenderFrame()
         {
-
+            if (Math.Abs(move) > 1)
+                dirrection = dirrection * (-1);
+             
+          
             watch.Stop();
             float deltaTime = (float)watch.ElapsedTicks / System.Diagnostics.Stopwatch.Frequency;
             watch.Restart();
 
             // use the deltaTime to adjust the angle of the cube and pyramid
             angle += deltaTime;
+            move = move + dirrection * deltaTime;
 
-            // set up the OpenGL viewport and clear both the color and depth bits
-            Gl.Viewport(0, 0, width, height);
-            Gl.Clear(ClearBufferMask.ColorBufferBit 
+          // set up the OpenGL viewport and clear both the color and depth bits
+          Gl.Viewport(0, 0, width, height);
+            Gl.Clear(ClearBufferMask.ColorBufferBit
                 | ClearBufferMask.DepthBufferBit);
 
 
-              // use our shader program
+            // use our shader program
             Gl.UseProgram(program);
 
+ 
             // transform the triangle
-            program["model_matrix"].SetValue( Matrix4.CreateTranslation(new Vector3(-1.5f, 0, 0) * Matrix4.CreateRotationZ(angle)));
+            program["model_matrix"].SetValue(Matrix4.CreateTranslation(new Vector3(0, 0, 0)));
             Gl.BindBufferToShaderAttribute(triangle, program, "vertexPosition");
+
+            triangleColor = new VBO<Vector3>(new Vector3[] { new Vector3(0, 0, 1) , new Vector3(0, 1, 1 ), new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1) });
+
             Gl.BindBufferToShaderAttribute(triangleColor, program, "vertexColor");
             Gl.BindBuffer(triangleElements);
 
-            Gl.DrawElements(BeginMode.Triangles, triangleElements.Count, DrawElementsType.UnsignedInt, IntPtr.Zero);
+            Gl.DrawElements(BeginMode.Quads, triangleElements.Count, DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             Glut.glutSwapBuffers();
         }
