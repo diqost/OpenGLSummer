@@ -1,0 +1,35 @@
+ public static string VertexShader = @"
+#version 130
+
+in vec3 vertexPosition;
+in vec2 vertexUV;
+
+out vec2 uv;
+
+uniform mat4 projection_matrix;
+uniform mat4 view_matrix;
+uniform mat4 model_matrix;
+
+void main(void)
+{
+    uv = vertexUV;
+    gl_Position = projection_matrix * view_matrix * model_matrix * vec4(vertexPosition, 1);
+}
+";
+
+        public static string FragmentShader = @"
+#version 130
+
+uniform sampler2D texture;
+
+in vec2 uv;
+
+out vec4 fragment;
+
+void main(void)
+{
+    fragment = texture2D(texture, uv);
+}
+";
+    }
+}
