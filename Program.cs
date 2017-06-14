@@ -98,7 +98,7 @@ namespace OpenGLTutorial1
             List<Tuple<Square, Square>> collisions =
                 new List<Tuple<Square,Square>>();
             for (int i = 0; i < squares.Count; i++)
-                for (int j = 0; j < squares.Count; j++)
+                for (int j = i + 1; j < squares.Count; j++)
                 {
                     if (squares[i].collide(squares[j])) {
                         bool found = false;
@@ -128,12 +128,14 @@ namespace OpenGLTutorial1
             {
                 if (collisions[i].Item1 != null)
                 {
+                    squares.Add(new Square(collisions[i].Item1, collisions[i].Item2));
                     int index = squares.FindIndex(x => x == collisions[i].Item1);
                     if (index >= 0)
                         squares.RemoveAt(index);
                     index = squares.FindIndex(x => x == collisions[i].Item2);
                     if (index >= 0)
                         squares.RemoveAt(index);
+                    
                 }
             }
         }
